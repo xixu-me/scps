@@ -44,11 +44,12 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          if git diff --quiet -- skills; then
+          git add -A skills
+
+          if git diff --cached --quiet -- skills; then
             echo "No skills changes to commit."
             exit 0
           fi
 
-          git add skills
           git commit -m "chore: sync skills from openai/plugins"
           git push
