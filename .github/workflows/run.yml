@@ -1,0 +1,54 @@
+name: Sync Codex Plugin Skills
+
+on:
+  schedule:
+    - cron: "30 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync-skills:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout current repository
+        uses: actions/checkout@v4
+
+      - name: Clone source repository
+        run: |
+          rm -rf /tmp/openai-plugins
+          git clone --depth 1 https://github.com/openai/plugins.git /tmp/openai-plugins
+
+      - name: Sync skills directories
+        run: |
+          set -euo pipefail
+
+          mkdir -p skills
+          rm -rf /tmp/collected-skills
+          mkdir -p /tmp/collected-skills
+
+          find /tmp/openai-plugins/plugins -mindepth 3 -maxdepth 3 -type d -path "*/skills/*" | while read -r skill_dir; do
+            skill_name="$(basename "$skill_dir")"
+            rm -rf "/tmp/collected-skills/$skill_name"
+            cp -a "$skill_dir" "/tmp/collected-skills/$skill_name"
+          done
+
+          rsync -a --delete /tmp/collected-skills/ skills/
+
+      - name: Commit and push changes
+        run: |
+          set -euo pipefail
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet -- skills; then
+            echo "No skills changes to commit."
+            exit 0
+          fi
+
+          git add skills
+          git commit -m "chore: sync skills from openai/plugins"
+          git push
