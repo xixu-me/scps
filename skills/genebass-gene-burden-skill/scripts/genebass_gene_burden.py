@@ -111,7 +111,7 @@ def fetch_gene_phewas(gene_id: str, burden_set: str) -> tuple[str, Any, int]:
     try:
         data = resp.json()
     except ValueError as exc:
-        raise RuntimeError(f"Genebass API returned non-JSON for URL {url}") from exc
+        raise RuntimeError("Genebass API returned non-JSON.") from exc
     return url, data, status_code
 
 
@@ -207,9 +207,10 @@ def main() -> int:
         return 2
 
     try:
-        query_url, data, status_code = fetch_gene_phewas(gene_id, burden_set)
+        _query_url, data, status_code = fetch_gene_phewas(gene_id, burden_set)
     except requests.RequestException as exc:
-        sys.stdout.write(json.dumps(error("network_error", f"Genebass request failed: {exc}")))
+        message = str(exc).replace(gene_id, "<gene_id>")
+        sys.stdout.write(json.dumps(error("network_error", f"Genebass request failed: {message}")))
         return 1
     except RuntimeError as exc:
         message = str(exc)
@@ -229,14 +230,13 @@ def main() -> int:
         output = {
             "ok": True,
             "source": "genebass",
-            "input": {"type": "ensembl_gene_id", "value": gene_id},
+            "input": {"type": "ensembl_gene_id", "provided": True},
             "burden_set": burden_set,
-            "query_url": query_url,
             "gene": None,
             "association_count": 0,
             "association_count_total": 0,
             "truncated": False,
-            "associations": [],
+            "associations_available": False,
             "warnings": warnings,
         }
         sys.stdout.write(json.dumps(output))
@@ -269,14 +269,13 @@ def main() -> int:
     output = {
         "ok": True,
         "source": "genebass",
-        "input": {"type": "ensembl_gene_id", "value": gene_id},
+        "input": {"type": "ensembl_gene_id", "provided": True},
         "burden_set": burden_set,
-        "query_url": query_url,
-        "gene": gene_out,
+        "gene_available": gene_out is not None,
         "association_count": len(associations),
         "association_count_total": total,
         "truncated": truncated,
-        "associations": associations,
+        "associations_available": bool(associations),
         "warnings": warnings,
     }
     sys.stdout.write(json.dumps(output))

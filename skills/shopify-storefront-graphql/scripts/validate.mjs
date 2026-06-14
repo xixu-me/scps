@@ -806,8 +806,24 @@ var require_blockString = __commonJS({
       }
       return true;
     }
+    const BLOCK_STRING_QUOTE = '"'.repeat(3);
+    const ESCAPED_BLOCK_STRING_QUOTE = "\\" + BLOCK_STRING_QUOTE;
+    function escapeBlockStringTripleQuotes(value) {
+      let result = "";
+      let index = 0;
+      while (index < value.length) {
+        if (value.startsWith(BLOCK_STRING_QUOTE, index)) {
+          result += ESCAPED_BLOCK_STRING_QUOTE;
+          index += BLOCK_STRING_QUOTE.length;
+        } else {
+          result += value[index];
+          index += 1;
+        }
+      }
+      return result;
+    }
     function printBlockString(value, options) {
-      const escapedValue = value.replace(/"""/g, '\\"""');
+      const escapedValue = escapeBlockStringTripleQuotes(value);
       const lines = escapedValue.split(/\r\n|[\n\r]/g);
       const isSingleLine = lines.length === 1;
       const forceLeadingNewLine = lines.length > 1 && lines.slice(1).every(
