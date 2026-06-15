@@ -54,15 +54,9 @@
         indicator.textContent = 'Click an option above, then return to the terminal';
       } else if (selected.length === 1) {
         const label = selected[0].querySelector('h3, .content h3, .card-body h3')?.textContent?.trim() || selected[0].dataset.choice;
-        const selectedText = document.createElement('span');
-        selectedText.className = 'selected-text';
-        selectedText.textContent = label + ' selected';
-        indicator.replaceChildren(selectedText, document.createTextNode(' — return to terminal to continue'));
+        indicator.innerHTML = '<span class="selected-text">' + label + ' selected</span> — return to terminal to continue';
       } else {
-        const selectedText = document.createElement('span');
-        selectedText.className = 'selected-text';
-        selectedText.textContent = selected.length + ' selected';
-        indicator.replaceChildren(selectedText, document.createTextNode(' — return to terminal to continue'));
+        indicator.innerHTML = '<span class="selected-text">' + selected.length + ' selected</span> — return to terminal to continue';
       }
     }, 0);
   });
