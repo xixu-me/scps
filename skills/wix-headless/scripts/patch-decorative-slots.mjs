@@ -101,33 +101,6 @@ const warnings = [];
 
 const SLOT_DIV_REGEX = /(<div[^>]*\bdata-decorative-slot="([^"]+)"[^>]*>)([\s\S]*?)(<\/div>)/g;
 
-function removeHtmlComments(value) {
-  let output = "";
-  let index = 0;
-  while (index < value.length) {
-    const start = value.indexOf("<!--", index);
-    if (start === -1) {
-      output += value.slice(index);
-      break;
-    }
-    output += value.slice(index, start);
-    const end = value.indexOf("-->", start + 4);
-    if (end === -1) {
-      break;
-    }
-    index = end + 3;
-  }
-  return output;
-}
-
-function escapeHtmlAttribute(value) {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/"/g, "&quot;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-}
-
 for (const file of candidates) {
   const original = readFileSync(file, "utf8");
   let modified = original;
@@ -140,7 +113,7 @@ for (const file of candidates) {
       return match;
     }
 
-    const stripped = removeHtmlComments(inner).trim();
+    const stripped = inner.replace(/<!--[\s\S]*?-->/g, "").trim();
 
     if (/<img\b/i.test(stripped)) {
       skipped.push({ file, slot: slotKey, reason: "div already contains an <img> tag (idempotent skip)" });
@@ -153,7 +126,7 @@ for (const file of candidates) {
     }
 
     fileChanged = true;
-    const img = `<img src="${escapeHtmlAttribute(url)}" alt="" loading="lazy" decoding="async" class="decorative-slot-img" />`;
+    const img = `<img src="${url}" alt="" loading="lazy" decoding="async" class="decorative-slot-img" />`;
     patched.push({ file, slot: slotKey });
     return `${openTag}\n      ${img}${inner}${closeTag}`;
   });

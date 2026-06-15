@@ -270,59 +270,6 @@ def _redact(text: str, secrets: list[str]) -> str:
     return redacted
 
 
-def _redact_sensitive_payload(value: Any, *, key_name: str = "") -> Any:
-    if isinstance(value, dict):
-        return {key: _redact_sensitive_payload(item, key_name=str(key)) for key, item in value.items()}
-    if isinstance(value, list):
-        return [_redact_sensitive_payload(item, key_name=key_name) for item in value]
-    if _is_secret_name(key_name) and value not in (None, ""):
-        return "<redacted>"
-    return value
-
-
-def _public_manifest_summary(manifest: dict[str, Any]) -> dict[str, Any]:
-    return {
-        "schema_version": manifest.get("schema_version"),
-        "skill": manifest.get("skill"),
-        "status": manifest.get("status"),
-        "generated_at": manifest.get("generated_at"),
-        "preflight_mode": manifest.get("preflight_mode"),
-        "dependency_policy": manifest.get("dependency_policy"),
-        "platform": {
-            "system": manifest.get("platform", {}).get("system"),
-            "machine": manifest.get("platform", {}).get("machine"),
-            "python": manifest.get("platform", {}).get("python"),
-        },
-        "targets": manifest.get("targets", []),
-        "conversion_tools": manifest.get("conversion_tools", []),
-        "runtimes": {
-            name: {
-                "status": entry.get("status"),
-                "message": entry.get("message", ""),
-            }
-            for name, entry in manifest.get("runtimes", {}).items()
-            if isinstance(entry, dict)
-        },
-        "services": {
-            name: {
-                "status": entry.get("status"),
-                "message": entry.get("message", ""),
-            }
-            for name, entry in manifest.get("services", {}).items()
-            if isinstance(entry, dict)
-        },
-        "blocker_count": len(manifest.get("blockers", [])),
-    }
-
-
-def _public_preflight_report() -> dict[str, str]:
-    return {
-        "schema_version": SCHEMA_VERSION,
-        "skill": SKILL,
-        "report": "Detailed preflight state is omitted from this public report to avoid writing credentials or derived secret material.",
-    }
-
-
 def _run(
     command: list[str],
     *,
@@ -1671,17 +1618,16 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     manifest, env = build_manifest(args)
-    report_manifest = _public_preflight_report()
     manifest_path = Path(manifest["manifest_path"])
     manifest_path.parent.mkdir(parents=True, exist_ok=True)
-    manifest_path.write_text(json.dumps(report_manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     if args.env_file:
         _write_env_file(args.env_file.expanduser().resolve(), env)
     if args.powershell_env_file:
         _write_powershell_env_file(args.powershell_env_file.expanduser().resolve(), env)
     if args.markdown_report:
-        _write_markdown(args.markdown_report.expanduser().resolve(), report_manifest)
-    print(json.dumps(report_manifest, indent=2, sort_keys=True))
+        _write_markdown(args.markdown_report.expanduser().resolve(), manifest)
+    print(json.dumps(manifest, indent=2, sort_keys=True))
     return 0 if manifest["status"] == "ready" else 1
 
 
