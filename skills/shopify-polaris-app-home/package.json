@@ -7,6 +7,6 @@
     "@shopify/polaris-types": "1.0.1",
     "@shopify/app-bridge-types": "0.7.0",
     "preact": "10.28.4",
-    "@types/react": "19.2.14"
+    "@types/react": "19.3.0"
   }
 }
