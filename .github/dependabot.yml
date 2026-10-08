@@ -1,0 +1,39 @@
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+      timezone: "Asia/Shanghai"
+  - package-ecosystem: "npm"
+    directories:
+      - "/skills/expo-cicd-workflows/scripts"
+      - "/skills/shopify-hydrogen"
+      - "/skills/shopify-liquid"
+      - "/skills/shopify-polaris-admin-extensions"
+      - "/skills/shopify-polaris-app-home"
+      - "/skills/shopify-polaris-checkout-extensions"
+      - "/skills/shopify-polaris-customer-account-extensions"
+      - "/skills/shopify-pos-ui"
+      - "/skills/vercel-services/references/fastapi-vite/frontend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+      timezone: "Asia/Shanghai"
+  - package-ecosystem: "pip"
+    directories:
+      - "/skills/boltz-protein-design/scripts"
+      - "/skills/comps-valuation/scripts"
+      - "/skills/earnings-deep-dive/scripts"
+      - "/skills/earnings-preview"
+      - "/skills/model-audit-tieout/scripts"
+      - "/skills/public-equity-investing/internal-support/excel-data-cleaner/scripts"
+      - "/skills/thesis-tracker/scripts"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+      timezone: "Asia/Shanghai"
