@@ -1,24 +1,9 @@
 ---
 name: react-best-practices
-description: React best-practices reviewer for TSX files. Triggers after editing multiple TSX components to run a condensed quality checklist covering component structure, hooks usage, accessibility, performance, and TypeScript patterns.
+description: React and Next.js performance optimization guidelines from Vercel Engineering. This skill should be used when writing, reviewing, or refactoring React/Next.js code to ensure optimal performance patterns. Triggers on tasks involving React components, Next.js pages, data fetching, bundle optimization, or performance improvements.
 metadata:
-  priority: 4
-  docs:
-    - "https://react.dev/reference/react"
-    - "https://react.dev/learn"
-  pathPatterns:
-    - 'src/components/**/*.tsx'
-    - 'src/components/**/*.jsx'
-    - 'app/components/**/*.tsx'
-    - 'app/components/**/*.jsx'
-    - 'components/**/*.tsx'
-    - 'components/**/*.jsx'
-    - 'src/ui/**/*.tsx'
-    - 'lib/components/**/*.tsx'
-  bashPatterns: []
-  importPatterns:
-    - 'react'
-    - 'react-dom'
+  author: vercel
+  version: "1.0.0"
 ---
 
 # Vercel React Best Practices
