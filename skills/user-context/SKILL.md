@@ -1,71 +1,149 @@
 ---
 name: user-context
-description: Initialize, inspect, save, update, forget, export, or explicitly reset the Public Equity Investing plugin's local user context, source setup, or optional automation setup. Use only when the user explicitly asks to manage Public Equity Investing saved preferences, source pointers, context storage, or recurring automation.
+description: Load or manage Product Design's saved user context. Use when the user asks to set up Product Design, get started, onboard, save product or design sources, see what Product Design remembers, update saved context, or remember Product Design preferences. Examples include product URLs, Figma files, screenshots, reference images, codebase paths, Storybook, tokens, design systems, brand assets, and general product/design notes.
 ---
 
-# Public Equity Investing User Context
+# User Context
 
-This skill owns the Public Equity Investing plugin's local user-context storage foundation and explicit-only onboarding contract. It is intentionally narrow: it can initialize, inspect, save, update, forget, export, or explicitly reset local context, interpret the next onboarding action, guide the four-step intro/defaults -> connectors/plugins -> automation -> hero-workflow flow, and configure user-approved automations. Ordinary Public Equity Investing workflows do not invoke this skill by default; saved context and source setup are optional accelerators, not a pre-answer gate.
+User Context stores the product and design references a designer uses often, so future Product Design work starts from the right sources.
 
-## State Files
+Use this skill when the user asks to:
 
-Store Public Equity Investing state under:
+- set up Product Design
+- get started with Product Design
+- onboard with Product Design
+- save product or design sources
+- see what Product Design remembers
+- update saved product or design context
+- remember a Product Design preference
+- setup my plugin
+
+## Critical Overrides
+
+- Refer to the Plugin router [$index](../index/SKILL.md) before proceeding.
+- Follow [$critical-overrides](../../references/critical-overrides.md).
+- Before offering onboarding or saving context for future conversations, confirm that local shell access is available, `$CODEX_HOME` can be resolved, and `$CODEX_HOME/state/plugins/product-design/` exists and is writable or can be created in a writable parent directory. If `user-context.md` already exists, confirm that it is writable too.
+- If any check cannot be completed or fails, persistent context is unavailable. Do not offer saved-context onboarding or claim that new context was saved for future conversations. If the user asks to save something, explain that it can be used in the current conversation but not saved for future conversations.
+
+## Saved User Context
+
+If `user-context.md` exists, use it by default.
+
+Use saved product URLs, Figma files, screenshots, reference images, codebase paths, Storybook, tokens, design systems, brand assets, component refs, browser preferences, and share targets to ground Product Design work.
+
+Ideation, prototypes, audits, clones, and critiques should match the saved product context unless the user asks for something different.
+
+When a workflow needs visual grounding, attach or include relevant saved screenshots, reference images, tokens, design language, and component references in ImageGen, ideation, prototype, audit, and critique work.
+
+## State File
+
+Saved context lives here:
 
 ```text
-$CODEX_HOME/state/plugins/openai-monorepo/public-equity-investing/
+$CODEX_HOME/state/plugins/product-design/user-context.md
 ```
 
-The storage foundation owns only:
+Saved screenshots and reference images live next to it:
 
 ```text
-user-context.md
-onboarding-state.json
+$CODEX_HOME/state/plugins/product-design/assets/
 ```
 
-Do not create `category-state.json`.
+If the file does not exist, continue normally unless the user asks to set up Product Design, save context, or the current task is blocked by missing product/design context.
 
-## Initialize
+## Preflight
 
-When the user explicitly asks to initialize Public Equity Investing user context, run `python3 skills/user-context/scripts/init_user_context_state.py` with the shell working directory set to this plugin's root. Set the working directory before the first attempt; do not probe alternate relative paths.
+When any Product Design workflow needs saved context, run:
 
-The initializer creates missing state files from bundled templates and preserves existing files unless the user explicitly requests overwrite behavior.
+```bash
+python3 scripts/user_context_preflight.py
+```
 
-## Inspect
+Use the returned saved entries as the starting context for the task.
 
-When the user explicitly asks to inspect saved Public Equity Investing context, run `python3 skills/user-context/scripts/user_context_preflight.py` with the shell working directory set to this plugin's root. Set the working directory before the first attempt; do not probe alternate relative paths.
+If the script reports that no saved context exists, continue from the current user prompt unless setup context is required.
 
-Use the returned read-only JSON envelope to summarize initialization status, onboarding status, the deterministic `next_action`, the lightweight `onboarding_progress`, and empty memory categories. Treat `user-context.md` as user-editable durable context and `onboarding-state.json` as operational scaffolding.
+Do not browse, open, or inspect every saved reference during preflight. Inspect only the saved references needed for the current task.
 
-## Save Update Or Forget
+## Setup
 
-When the user explicitly asks to remember, save, update, forget, export, or apply durable Public Equity Investing preferences or source pointers, follow `skills/user-context/references/plugin-memory.md` from the plugin root. Store reusable user-approved context in `user-context.md`; keep live company updates and operational connector state out. Initialize missing state only when a save needs persistence.
+Use [references/onboarding.md](references/onboarding.md) when the user asks to set up Product Design, asks what Product Design can remember, asks what Product Design knows about their product, or provides product/design references to save.
 
-## Onboarding
+For setup-only requests, explain what Product Design can remember and ask for useful sources.
 
-When the user explicitly asks to set up, resume, defer, quiet, or complete Public Equity Investing onboarding, follow `skills/user-context/references/onboarding.md` from the plugin root. Use the inspection helper's `next_action` as the current step and render its `copy_ref` template substantially verbatim. Keep the visible flow to four steps: intro and lightweight defaults, connectors and plugins, one optional automation, then a three-option hero-workflow chooser. Capture broader durable preferences only when the user explicitly asks or supplies them naturally.
+Adjust the context-gathering request to match the user's request. First-time setup differs from updating existing context.
 
-## Source Category Vocabulary
+Do not inspect the workspace, install dependencies, scaffold a prototype, generate images, run audits, or start implementation during setup.
 
-`skills/user-context/plugin-author-config/source-category-config.json` reserves static Public Equity Investing source category ids, labels, and preference hints for explicit setup/status work. The inspection helper exposes those categories as `source_category_plan` and echoes any setup-owned routes already saved under `onboarding-state.json` `connector_confirmation`. Ordinary workflow skills use the router's cross-skill runtime contract and `.app.json` categories instead of reading this helper first. Use `skills/user-context/references/source-category-runtime.md` from the plugin root for the source-setup boundary. Inspection does not prove source readiness, select routes, inspect connectors, or create `category-state.json`.
+After the user provides references to save, run:
 
-## Optional Automations
+```bash
+python3 scripts/init_user_context.py
+```
 
-`skills/user-context/plugin-author-config/automation-config.md` defines the small author-owned automation menu. When the user explicitly asks for a recurring Public Equity Investing workflow or accepts the optional onboarding automation step, follow `skills/user-context/references/automation.md` from the plugin root. Do not create, update, pause, resume, or remove automations during ordinary workflow work.
+Then add the references to the created `user-context.md`.
 
-## Reset
+## Save
 
-When the user explicitly asks to reset Public Equity Investing user context, run `python3 skills/user-context/scripts/reset_user_context_state.py` with the shell working directory set to this plugin's root. Set the working directory before the first attempt; do not probe alternate relative paths.
+Save useful, durable Product Design context:
 
-The reset helper moves active state files into a timestamped sibling backup directory before clearing them from the active state directory.
+- Product URLs
+- Figma files
+- Screenshots and reference images
+- Codebase paths
+- Storybook and component docs
+- Design tokens and theme sources
+- Brand, logo, icon, illustration, image, and asset sources
+- Preferred browser, capture tools, and share targets
+- Team conventions that make future Product Design work more accurate
 
-## Current Boundary
+When the user provides screenshots or reference images to save, copy them into `assets/` next to `user-context.md` and link them from the saved entry.
 
-- The Public Equity Investing router and focused workflow skills do not run `scripts/user_context_preflight.py` during ordinary workflow work.
-- Do not initialize state merely because another Public Equity Investing skill runs.
-- Do not mutate state when running the read-only inspection helper.
-- Do not inspect apps, connectors, plugins, `.app.json`, or source readiness during saved-context inspection.
-- During user-approved explicit Source Setup, follow `skills/user-context/references/source-category-runtime.md` from the plugin root.
-- During user-approved explicit automation setup or maintenance, follow `skills/user-context/references/automation.md` from the plugin root.
-- Do not invoke onboarding unless the user explicitly asks for saved-context setup or management.
-- Do not create or modify automations unless the user explicitly asks or accepts the optional automation setup step.
-- Do not add, read, or migrate `category-state.json`. The reset helper may back up and clear an older copy during an explicit reset.
+Give each saved image a clear, descriptive filename that says what the image shows. Use names future Product Design runs can understand without opening the file.
+
+Good image names:
+
+```text
+assets/chatgpt-settings-modal-dark-mode.png
+assets/payment-sheet-mobile-error-state.png
+assets/product-dashboard-sidebar-navigation.png
+assets/storybook-primary-button-states.png
+assets/brand-logo-lockup-purple-gradient.png
+assets/onboarding-flow-welcome-step.png
+assets/checkout-confirmation-screen.png
+assets/account-menu-open-state.png
+```
+
+Do not save secrets, credentials, API keys, private tokens, copied customer data, or anything that should not persist.
+
+Use this structure:
+
+```md
+# {Category}
+
+- Description: {what this category is and when future Product Design runs should use it}
+
+## Saved Links And Context
+
+{Saved reference or fact}
+- Date Added: YYYY-MM-DD.
+- File: assets/{clear-descriptive-name}.png
+- Useful Context: {what this reference represents}
+- Future Use: {how future Product Design work should use it}
+```
+
+Include `File:` only when the saved entry has a local image file.
+
+When a category has no saved references yet, use exactly:
+
+```md
+status: not provided
+```
+
+Keep saved context curated. Prefer a few high-value references over a dump of every possible URL or file.
+
+## Read
+
+- Do not treat `status: not provided` as a fact.
+- Read through `scripts/user_context_preflight.py` when local shell access is available.
+- Use saved context as default grounding, then inspect only what the current task needs.
