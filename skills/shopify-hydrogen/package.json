@@ -11,7 +11,7 @@
     "preact": "10.28.4",
     "react-router": "8.5.2",
     "schema-dts": "1.1.5",
-    "type-fest": "5.5.0",
+    "type-fest": "6.0.3",
     "typescript": "5.9.3"
   }
 }
